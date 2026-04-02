@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -10,6 +9,7 @@ import (
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/pkg/errors"
 )
 
 func (c *Commander) SaveToFile(inputMsg *tgbotapi.Message) {
@@ -25,7 +25,6 @@ func (c *Commander) SaveToFile(inputMsg *tgbotapi.Message) {
 
 	var deadlineDateInTimeFormat time.Time
 
-	// дз убрать команду save из сообщения, и сохранять дату из сообщения а не ту когда сообщение было отправлено
 	// если будет время то придумать каким образом задать дату
 	candidate, err := WordDatetimeSearcher(inputMsg.Text)
 	//TODO: 13.03.2026 ДЗ доописать функцию WordDatetimeSearcher и протестировать что получилось, если нужно SaveToFile поправить
@@ -34,8 +33,10 @@ func (c *Commander) SaveToFile(inputMsg *tgbotapi.Message) {
 
 		candidate2, err2 := DateTimeSearcher(inputMsg.Text)
 		if err2 != nil {
-			deadlineDateInTimeFormat = time.Now()
+			resp := tgbotapi.NewMessage(inputMsg.Chat.ID, err2.Error())
+			c.bot.Send(resp)
 			fmt.Println("error", err2)
+			return
 		}
 		if err2 == nil {
 			deadlineDateInTimeFormat = candidate2
@@ -128,7 +129,9 @@ func DateTimeSearcher(inputMsg string) (time.Time, error) {
 	}
 	deadlineDateInTimeFormat, err := time.Parse("02.01.2006", string(date))
 	if err != nil {
-		fmt.Println("error", err)
+		fmt.Println("error ", err)
+		err = errors.Wrap(err, "date format is incorrect, expected format: dd.mm.yyyy")
+		return time.Time{}, err
 	}
 	return deadlineDateInTimeFormat, nil
 }
