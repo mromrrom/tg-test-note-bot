@@ -1,7 +1,7 @@
 package product
 
 var AllProducts = []Product{
-	{"one"},
+	{"yandex.ru"},
 	{"two"},
 	{"three"},
 	{"four"},

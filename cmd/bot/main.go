@@ -2,17 +2,18 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"time"
+
 	"github.com/AlexLuminare/demo-bot/internal/app/commands"
 	"github.com/AlexLuminare/demo-bot/internal/service/product"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/joho/godotenv"
-	"log"
-	"os"
-	"time"
 )
 
 func main() {
-	godotenv.Load(".ENV")
+	godotenv.Load("../../.ENV")
 	Token := os.Getenv("TELEGRAM_TOKEN")
 	fmt.Println("TOKEN: ", Token)
 	bot, err := tgbotapi.NewBotAPI(Token)
@@ -20,6 +21,7 @@ func main() {
 		log.Panic(err)
 	}
 
+	//var m tgMock
 	//ВСЕ СЕРВИСЫ ИНИЦИАЛИЗИРУЕМ ЗДЕСЬ
 	productService := product.NewService()
 	commander := commands.NewCommandRouter(bot, productService)
@@ -30,7 +32,9 @@ func main() {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
-	updates, err := bot.GetUpdatesChan(u)
+	updates, err := bot.GetUpdatesChan(u) // 26.03.2026 замокать updates на гитхабе это было
+	// https://github.com/bot-api/telegram/blob/master/testutils/mocks.go
+	// ищем способы замокать телегу
 	if err != nil {
 		log.Panic(err)
 	}
@@ -46,3 +50,11 @@ func main() {
 		//msg.ReplyToMessageID = update.Message.MessageID
 	}
 }
+
+// заняться той частью где надо в нужную дату отправлять сообщения
+// 1 - вычитать весь файл и найти нужные даты (можно для удобства подчистить файл),
+// сохранять в структуру напр все задания на текущий день, неправильные даты можно пропускать
+// 2 -
+// 3 -
+//
+//
